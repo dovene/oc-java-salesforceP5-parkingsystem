@@ -117,5 +117,26 @@ public class ParkingService {
 <span class="nc" id="L117">            logger.error(&quot;Unable to process exiting vehicle&quot;,e);</span>
 <span class="fc" id="L118">        }</span>
 <span class="fc" id="L119">    }</span>
+
+    public void processExitingVehicleWithSpecificTime(Date outTime) {
+        try{
+<span class="nc" id="L123">            String vehicleRegNumber = getVehichleRegNumber();</span>
+<span class="nc" id="L124">            Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);</span>
+           // Date outTime = new Date();
+<span class="nc" id="L126">            ticket.setOutTime(outTime);</span>
+<span class="nc" id="L127">            fareCalculatorService.calculateFare(ticket);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            if(ticketDAO.updateTicket(ticket)) {</span>
+<span class="nc" id="L129">                ParkingSpot parkingSpot = ticket.getParkingSpot();</span>
+<span class="nc" id="L130">                parkingSpot.setAvailable(true);</span>
+<span class="nc" id="L131">                parkingSpotDAO.updateParking(parkingSpot);</span>
+<span class="nc" id="L132">                System.out.println(&quot;Please pay the parking fare:&quot; + ticket.getPrice());</span>
+<span class="nc" id="L133">                System.out.println(&quot;Recorded out-time for vehicle number:&quot; + ticket.getVehicleRegNumber() + &quot; is:&quot; + outTime);</span>
+<span class="nc" id="L134">            }else{</span>
+<span class="nc" id="L135">                System.out.println(&quot;Unable to update ticket information. Error occurred&quot;);</span>
+            }
+<span class="nc" id="L137">        }catch(Exception e){</span>
+<span class="nc" id="L138">            logger.error(&quot;Unable to process exiting vehicle&quot;,e);</span>
+<span class="nc" id="L139">        }</span>
+<span class="nc" id="L140">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

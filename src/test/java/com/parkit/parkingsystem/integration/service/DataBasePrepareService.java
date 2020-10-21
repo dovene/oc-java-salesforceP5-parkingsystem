@@ -27,4 +27,19 @@ public class DataBasePrepareService {
     }
 
 
+    public void freeParkingSpot(){
+        Connection connection = null;
+        try{
+            connection = dataBaseTestConfig.getConnection();
+
+            //set parking entries to available
+            connection.prepareStatement("update parking set available = true").execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            dataBaseTestConfig.closeConnection(connection);
+        }
+    }
+
+
 }

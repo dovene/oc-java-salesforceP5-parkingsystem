@@ -14,11 +14,11 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-<span class="nc" id="L17">public class TicketDAO {</span>
+<span class="fc" id="L17">public class TicketDAO {</span>
 
 <span class="fc" id="L19">    private static final Logger logger = LogManager.getLogger(&quot;TicketDAO&quot;);</span>
 
-<span class="nc" id="L21">    public DataBaseConfig dataBaseConfig = new DataBaseConfig();</span>
+<span class="fc" id="L21">    public DataBaseConfig dataBaseConfig = new DataBaseConfig();</span>
 
     public boolean saveTicket(Ticket ticket){
 <span class="nc" id="L24">        Connection con = null;</span>
@@ -89,15 +89,15 @@ import java.util.ArrayList;
     }
 
     public ArrayList&lt;Ticket&gt; getTicketByRegistrationNumber(String vehicleRegNumber) {
-<span class="nc" id="L92">        Connection con = null;</span>
-<span class="nc" id="L93">        ArrayList&lt;Ticket&gt; tickets = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L92">        Connection con = null;</span>
+<span class="fc" id="L93">        ArrayList&lt;Ticket&gt; tickets = new ArrayList&lt;&gt;();</span>
         try {
-<span class="nc" id="L95">            con = dataBaseConfig.getConnection();</span>
-<span class="nc" id="L96">            PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET_BY_REGISTRATION_NUMBER);</span>
+<span class="fc" id="L95">            con = dataBaseConfig.getConnection();</span>
+<span class="fc" id="L96">            PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET_BY_REGISTRATION_NUMBER);</span>
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-<span class="nc" id="L98">            ps.setString(1,vehicleRegNumber);</span>
-<span class="nc" id="L99">            ResultSet rs = ps.executeQuery();</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">            if(rs.next()){</span>
+<span class="fc" id="L98">            ps.setString(1,vehicleRegNumber);</span>
+<span class="fc" id="L99">            ResultSet rs = ps.executeQuery();</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">            if(rs.next()){</span>
 <span class="nc" id="L101">                Ticket ticket = new Ticket();</span>
 <span class="nc" id="L102">                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);</span>
 <span class="nc" id="L103">                ticket.setParkingSpot(parkingSpot);</span>
@@ -108,13 +108,13 @@ import java.util.ArrayList;
 <span class="nc" id="L108">                ticket.setOutTime(rs.getTimestamp(5));</span>
 <span class="nc" id="L109">                tickets.add(ticket);</span>
             }
-<span class="nc" id="L111">            dataBaseConfig.closeResultSet(rs);</span>
-<span class="nc" id="L112">            dataBaseConfig.closePreparedStatement(ps);</span>
+<span class="fc" id="L111">            dataBaseConfig.closeResultSet(rs);</span>
+<span class="fc" id="L112">            dataBaseConfig.closePreparedStatement(ps);</span>
 <span class="nc" id="L113">        }catch (Exception ex){</span>
 <span class="nc" id="L114">            logger.error(&quot;Error fetching next available slot&quot;,ex);</span>
         }finally {
-<span class="nc" id="L116">            dataBaseConfig.closeConnection(con);</span>
-<span class="nc" id="L117">            return tickets;</span>
+<span class="pc" id="L116">            dataBaseConfig.closeConnection(con);</span>
+<span class="pc" id="L117">            return tickets;</span>
 
         }
     }

@@ -5,10 +5,9 @@ import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class FareCalculatorService {
-    public static double DISCOUNT_PERCENTAGE = 0.05;
+    public static double DISCOUNT_IN_PERCENTAGE = 5;
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -16,24 +15,30 @@ public class FareCalculatorService {
         }
 
 
-        int inHour = ticket.getInTime().getHours();
-        int outHour = ticket.getOutTime().getHours();
-
         //TODO: Some tests are failing here. Need to check if this logic is correct
-        float duration = hoursBetween(ticket.getInTime(), ticket.getOutTime()) / (float) (60 * 60 * 1000);
+        //get the difference correctly to resolve the first ticket
+        float duration = hoursBetween(ticket.getInTime(), ticket.getOutTime()) ;
 
+        // free fare if duration does not exceed 30mn or O.5 hour
         if (duration <= 0.5){
             ticket.setPrice(0.0);
             return;
         }
 
+        // round it to avoid different result for same computation
         double timeSpent = (double) Math.round(duration * 1000)/1000;
+
+
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
                 ticket.setPrice(timeSpent * Fare.CAR_RATE_PER_HOUR);
+
+               // ticket.setPrice(applyDiscountIfApplicable(timeSpent * Fare.CAR_RATE_PER_HOUR, ticket.getVehicleRegNumber()));
                 break;
             }
             case BIKE: {
+               // ticket.setPrice(applyDiscountIfApplicable(timeSpent * Fare.BIKE_RATE_PER_HOUR, ticket.getVehicleRegNumber()));
+
                 ticket.setPrice(timeSpent * Fare.BIKE_RATE_PER_HOUR);
                 break;
             }
@@ -41,13 +46,20 @@ public class FareCalculatorService {
         }
     }
 
-    public static Long hoursBetween(Date start, Date end) {
-        return  end.getTime() - start.getTime();
+    public void calculateFareWithReccurency(Ticket ticket){
+        calculateFare(ticket);
+        ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * DISCOUNT_IN_PERCENTAGE / 100));
+    }
+
+    public static float hoursBetween(Date start, Date end) {
+        // compute the difference between start date and end date using date in milli second format
+        // the result is returned as hour unit
+        return  (end.getTime() - start.getTime() )/ (float) (60 * 60 * 1000);
     }
 
     public static double applyDiscountIfApplicable(double initialPrice, String registrationNumber) {
         if (isReccurentRegistrationNumber(registrationNumber, new TicketDAO())){
-            return  initialPrice * (1 - DISCOUNT_PERCENTAGE);
+            return  initialPrice * (1 - DISCOUNT_IN_PERCENTAGE);
         }
         return  initialPrice;
     }

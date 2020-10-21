@@ -16,44 +16,52 @@ import java.util.concurrent.TimeUnit;
         }
 
 
-<span class="fc" id="L19">        int inHour = ticket.getInTime().getHours();</span>
-<span class="fc" id="L20">        int outHour = ticket.getOutTime().getHours();</span>
-
         //TODO: Some tests are failing here. Need to check if this logic is correct
-<span class="fc" id="L23">        float duration = hoursBetween(ticket.getInTime(), ticket.getOutTime()) / (float) (60 * 60 * 1000);</span>
+        //get the difference correctly to resolve the first ticket
+<span class="fc" id="L21">        float duration = hoursBetween(ticket.getInTime(), ticket.getOutTime()) ;</span>
 
-<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        if (duration &lt;= 0.5){</span>
-<span class="nc" id="L26">            ticket.setPrice(0.0);</span>
-<span class="nc" id="L27">            return;</span>
+        // free fare if duration does not exceed 30mn or O.5 hour
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (duration &lt;= 0.5){</span>
+<span class="nc" id="L25">            ticket.setPrice(0.0);</span>
+<span class="nc" id="L26">            return;</span>
         }
 
+        // round it to avoid different result for same computation
 <span class="fc" id="L30">        double timeSpent = (double) Math.round(duration * 1000)/1000;</span>
-<span class="pc bpc" id="L31" title="1 of 3 branches missed.">        switch (ticket.getParkingSpot().getParkingType()){</span>
+
+
+<span class="pc bpc" id="L33" title="1 of 3 branches missed.">        switch (ticket.getParkingSpot().getParkingType()){</span>
             case CAR: {
-<span class="fc" id="L33">                ticket.setPrice(timeSpent * Fare.CAR_RATE_PER_HOUR);</span>
-<span class="fc" id="L34">                break;</span>
-            }
-            case BIKE: {
-<span class="fc" id="L37">                ticket.setPrice(timeSpent * Fare.BIKE_RATE_PER_HOUR);</span>
+                //ticket.setPrice(timeSpent * Fare.CAR_RATE_PER_HOUR);
+
+<span class="fc" id="L37">                ticket.setPrice(applyDiscountIfApplicable(timeSpent * Fare.CAR_RATE_PER_HOUR,ticket.getVehicleRegNumber()));</span>
 <span class="fc" id="L38">                break;</span>
             }
-<span class="nc" id="L40">            default: throw new IllegalArgumentException(&quot;Unkown Parking Type&quot;);</span>
-        }
-<span class="fc" id="L42">    }</span>
+            case BIKE: {
+<span class="fc" id="L41">                ticket.setPrice(applyDiscountIfApplicable(timeSpent * Fare.BIKE_RATE_PER_HOUR, ticket.getVehicleRegNumber()));</span>
 
-    public static Long hoursBetween(Date start, Date end) {
-<span class="fc" id="L45">        return  end.getTime() - start.getTime();</span>
+<span class="fc" id="L43">                ticket.setPrice(timeSpent * Fare.BIKE_RATE_PER_HOUR);</span>
+<span class="fc" id="L44">                break;</span>
+            }
+<span class="nc" id="L46">            default: throw new IllegalArgumentException(&quot;Unkown Parking Type&quot;);</span>
+        }
+<span class="fc" id="L48">    }</span>
+
+    public static float hoursBetween(Date start, Date end) {
+        // compute the difference between start date and end date using date in milli second format
+        // the result is returned as hour unit
+<span class="fc" id="L53">        return  (end.getTime() - start.getTime() )/ (float) (60 * 60 * 1000);</span>
     }
 
     public static double applyDiscountIfApplicable(double initialPrice, String registrationNumber) {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (isReccurentRegistrationNumber(registrationNumber, new TicketDAO())){</span>
-<span class="nc" id="L50">            return  initialPrice * (1 - DISCOUNT_PERCENTAGE);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (isReccurentRegistrationNumber(registrationNumber, new TicketDAO())){</span>
+<span class="nc" id="L58">            return  initialPrice * (1 - DISCOUNT_PERCENTAGE);</span>
         }
-<span class="nc" id="L52">        return  initialPrice;</span>
+<span class="fc" id="L60">        return  initialPrice;</span>
     }
 
     private static boolean isReccurentRegistrationNumber(String registrationNumber, TicketDAO ticketDAO) {
-<span class="nc bnc" id="L56" title="All 2 branches missed.">        return ticketDAO.getTicketByRegistrationNumber(registrationNumber).size() &gt; 1;</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        return ticketDAO.getTicketByRegistrationNumber(registrationNumber).size() &gt; 1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

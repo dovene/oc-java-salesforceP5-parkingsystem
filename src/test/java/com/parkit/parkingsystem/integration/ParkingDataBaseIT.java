@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Date;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,6 +53,7 @@ public class ParkingDataBaseIT {
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
         dataBasePrepareService.clearDataBaseEntries();
+       // dataBasePrepareService.freeParkingSpot();
     }
 
     @AfterAll
@@ -98,10 +101,30 @@ public class ParkingDataBaseIT {
         Ticket ticket = ticketDAO.getTicket(vehicleNumber);
         fareCalculatorService.calculateFare(ticket);
 
-       // assertEquals(vehicleNumber, ticketDAO.getTicket(vehicleNumber).getVehicleRegNumber());
-
         assertNotNull(ticketDAO.getTicket(vehicleNumber).getOutTime());
         assertEquals(ticket.getPrice(), ticketDAO.getTicket(vehicleNumber).getPrice());
     }
 
+
+    @Test
+    public void checkDiscountApplication(){
+        testParkingLotExit();
+        testParkingACar();
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        String vehicleNumber = "";
+        try {
+            vehicleNumber = inputReaderUtil.readVehicleRegistrationNumber();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Ticket ticket = ticketDAO.getTicket(vehicleNumber);
+        long inTime =  ticket.getInTime().getTime() ;
+        long outTime = inTime + (  60 * 60 * 1000);
+        Date outDate = new Date();
+        outDate.setTime(outTime);
+
+        boolean isRecurrent = ticketDAO.getTicketByRegistrationNumber(vehicleNumber).size()> 0;
+        parkingService.processExitingVehicleWithSpecificTime(outDate , isRecurrent);
+         assertEquals(1.425, ticketDAO.getTicket(vehicleNumber).getPrice());
+    }
 }
