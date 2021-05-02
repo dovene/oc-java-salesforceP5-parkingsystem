@@ -44,11 +44,11 @@ public class FareCalculatorService {
             }
             default: throw new IllegalArgumentException("Unkown Parking Type");
         }
-    }
 
-    public void calculateFareWithReccurency(Ticket ticket){
-        calculateFare(ticket);
-        ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * DISCOUNT_IN_PERCENTAGE / 100));
+        //Recurrent user
+        if (ticket.isRecurrentUser()) {
+            ticket.setPrice(ticket.getPrice() - (ticket.getPrice() * DISCOUNT_IN_PERCENTAGE / 100));
+        }
     }
 
     public static float hoursBetween(Date start, Date end) {
@@ -57,14 +57,4 @@ public class FareCalculatorService {
         return  (end.getTime() - start.getTime() )/ (float) (60 * 60 * 1000);
     }
 
-    public static double applyDiscountIfApplicable(double initialPrice, String registrationNumber) {
-        if (isReccurentRegistrationNumber(registrationNumber, new TicketDAO())){
-            return  initialPrice * (1 - DISCOUNT_IN_PERCENTAGE);
-        }
-        return  initialPrice;
-    }
-
-    private static boolean isReccurentRegistrationNumber(String registrationNumber, TicketDAO ticketDAO) {
-        return ticketDAO.getTicketByRegistrationNumber(registrationNumber).size() > 1;
-    }
 }

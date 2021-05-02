@@ -123,8 +123,7 @@ public class ParkingDataBaseIT {
         Date outDate = new Date();
         outDate.setTime(outTime);
 
-        boolean isRecurrent = ticketDAO.getTicketByRegistrationNumber(vehicleNumber).size()> 0;
-        parkingService.processExitingVehicleWithSpecificTime(outDate , isRecurrent);
-         assertEquals(1.425, ticketDAO.getTicket(vehicleNumber).getPrice());
+        parkingService.processExitingVehicleWithSpecificTime(outDate);
+        assertEquals(Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * FareCalculatorService.DISCOUNT_IN_PERCENTAGE / 100), ticketDAO.getTicket(vehicleNumber).getPrice());
     }
 }

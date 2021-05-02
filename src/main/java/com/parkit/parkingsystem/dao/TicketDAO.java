@@ -88,34 +88,33 @@ public class TicketDAO {
         return false;
     }
 
-    public ArrayList<Ticket> getTicketByRegistrationNumber(String vehicleRegNumber) {
+    /**
+     * @param vehicleRegNumber registration number of the vehicle
+     * @return true is the user is a reccurent user
+     */
+    public boolean isReccurentUser(String vehicleRegNumber) {
         Connection con = null;
-        ArrayList<Ticket> tickets = new ArrayList<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean isReccurentUser = false;
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET_BY_REGISTRATION_NUMBER);
-            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-            ps.setString(1,vehicleRegNumber);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                Ticket ticket = new Ticket();
-                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);
-                ticket.setParkingSpot(parkingSpot);
-                ticket.setId(rs.getInt(2));
-                ticket.setVehicleRegNumber(vehicleRegNumber);
-                ticket.setPrice(rs.getDouble(3));
-                ticket.setInTime(rs.getTimestamp(4));
-                ticket.setOutTime(rs.getTimestamp(5));
-                tickets.add(ticket);
+            ps = con.prepareStatement(DBConstants.PARKING_RECURRENCE);
+            ps.setString(1, vehicleRegNumber);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                isReccurentUser = rs.getBoolean(1);
+                isReccurentUser = rs.getInt(1) > 1;
             }
+        } catch (Exception ex) {
+            logger.error("Error fetching next available slot", ex);
+            return false;
+        } finally {
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
-        }catch (Exception ex){
-            logger.error("Error fetching next available slot",ex);
-        }finally {
             dataBaseConfig.closeConnection(con);
-            return tickets;
 
-        }
+        }return isReccurentUser;
     }
 }
