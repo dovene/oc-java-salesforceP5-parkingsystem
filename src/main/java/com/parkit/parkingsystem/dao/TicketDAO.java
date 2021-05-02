@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 public class TicketDAO {
 
@@ -85,5 +86,35 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+
+    /**
+     * @param vehicleRegNumber registration number of the vehicle
+     * @return true is the user is a reccurent user
+     */
+    public boolean isReccurentUser(String vehicleRegNumber) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean isReccurentUser = false;
+        try {
+            con = dataBaseConfig.getConnection();
+            ps = con.prepareStatement(DBConstants.PARKING_RECURRENCE);
+            ps.setString(1, vehicleRegNumber);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                isReccurentUser = rs.getBoolean(1);
+                isReccurentUser = rs.getInt(1) > 1;
+            }
+        } catch (Exception ex) {
+            logger.error("Error fetching next available slot", ex);
+            return false;
+        } finally {
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+            dataBaseConfig.closeConnection(con);
+
+        }return isReccurentUser;
     }
 }

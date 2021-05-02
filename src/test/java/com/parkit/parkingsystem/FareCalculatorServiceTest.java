@@ -124,4 +124,49 @@ public class FareCalculatorServiceTest {
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
     }
 
+    @Test
+    public void calculateFareCarForRecurrentUserWithDiscount() {
+
+        //GIVEN
+        Date inTime = new Date();
+        inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000)); //1 hour parking time
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setVehicleRegNumber("ABCDEF");
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setRecurrentUser(true);
+
+        //WHEN
+        fareCalculatorService.calculateFare(ticket);
+
+        //THEN
+        assertEquals(Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * FareCalculatorService.DISCOUNT_IN_PERCENTAGE / 100), ticket.getPrice());
+
+    }
+
+    @Test
+    public void calculateFareBikeForRecurrentUserWithDiscount() {
+
+        //GIVEN
+        Date inTime = new Date();
+        inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000)); //1 hour parking time
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setVehicleRegNumber("ABCDEF");
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setRecurrentUser(true);
+
+        //WHEN
+        fareCalculatorService.calculateFare(ticket);
+
+        //THEN
+        assertEquals(Fare.BIKE_RATE_PER_HOUR - (Fare.BIKE_RATE_PER_HOUR * FareCalculatorService.DISCOUNT_IN_PERCENTAGE / 100), ticket.getPrice());
+
+    }
 }
